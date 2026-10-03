@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA — School Mac Games Store</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    background: #050508; color: #e8e8ec; overflow-x: hidden; min-height: 100vh;
+  }
+  ::selection { background: #6c5ce7; color: #fff; }
+
+  /* ============ PRELOADER ============ */
+  #preloader {
+    position: fixed; inset: 0; z-index: 1000; background: #050508;
+    display: grid; place-items: center;
+    transition: opacity .7s, visibility .7s;
+  }
+  body.loaded #preloader { opacity: 0; visibility: hidden; }
+  .pl-logo {
+    font-weight: 800; font-size: 1.6rem; letter-spacing: 8px;
+    background: linear-gradient(135deg, #a29bfe, #00c2ff);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: plPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes plPulse { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
+  .pl-bar { width: 210px; height: 3px; background: rgba(255,255,255,.08); border-radius: 3px; margin: 1.2rem auto 0; overflow: hidden; }
+  .pl-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, #6c5ce7, #00c2ff); animation: plLoad 1.2s ease-out forwards; }
+  @keyframes plLoad { to { width: 100%; } }
+  .pl-sub { text-align: center; color: #555; font-size: .72rem; letter-spacing: 3px; margin-top: .9rem; text-transform: uppercase; }
+
+  /* ============ PROGRESS / CURSOR / FX ============ */
+  #progress { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 500;
+    background: linear-gradient(90deg, #6c5ce7, #00c2ff); box-shadow: 0 0 12px #6c5ce7; }
+  #fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .cursor-ring, .cursor-dot { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 900; border-radius: 50%; }
+  .cursor-ring {
+    width: 34px; height: 34px; border: 1.5px solid rgba(162,155,254,.8);
+    transform: translate(-50%,-50%); transition: width .25s, height .25s, background .25s, border-color .25s, opacity .3s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring.grow { width: 58px; height: 58px; background: rgba(108,92,231,.18); border-color: rgba(0,194,255,.9); }
+  .cursor-dot { width: 5px; height: 5px; background: #00c2ff; transform: translate(-50%,-50%); }
+  @media (hover:hover) and (pointer:fine) { body, a, button, iframe { cursor: none; } }
+  @media not ((hover:hover) and (pointer:fine)) { .cursor-ring, .cursor-dot { display: none; } }
+
+  /* ============ AMBIENT BG ============ */
+  .orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: .32; pointer-events: none; z-index: 0; animation: orbFloat 22s ease-in-out infinite alternate; }
+  .orb-1 { width: 600px; height: 600px; background: #6c5ce7; top: -220px; left: -160px; }
+  .orb-2 { width: 500px; height: 500px; background: #00c2ff; bottom: -160px; right: -120px; animation-delay: -8s; }
+  .orb-3 { width: 380px; height: 380px; background: #ff2d75; top: 42%; left: 58%; opacity: .14; animation-delay: -14s; }
+  @keyframes orbFloat {
+    0% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(60px,-50px) scale(1.15); }
+    100% { transform: translate(-40px,40px) scale(.95); }
+  }
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+  }
+
+  /* ============ NAV ============ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+    display: flex; align-items: center; justify-content: space-between; padding: 1rem 2.5rem;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(5,5,8,.55); border-bottom: 1px solid rgba(255,255,255,.06);
+    transform: translateY(-100%); transition: transform .8s cubic-bezier(.2,.8,.2,1);
+  }
+  body.loaded nav { transform: translateY(0); }
+  .logo { font-weight: 800; font-size: 1.25rem; letter-spacing: 2px; display: flex; align-items: center; gap: .55rem;
+    background: linear-gradient(135deg, #fff, #a29bfe); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .logo svg, footer .f-logo svg, .pl-mark { filter: drop-shadow(0 0 10px rgba(108,92,231,.65)); animation: logoSpin 14s linear infinite; }
+  @keyframes logoSpin { to { transform: rotate(360deg); } }
+  .logo span { -webkit-text-fill-color: #6c5ce7; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: #9a9aa5; text-decoration: none; font-size: .9rem; font-weight: 500; transition: color .3s; }
+  .nav-links a:hover { color: #fff; }
+  .cart-btn {
+    display: flex; align-items: center; gap: .5rem; background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1); color: #fff; padding: .55rem 1.1rem;
+    border-radius: 999px; cursor: pointer; font-weight: 600; font-size: .85rem; transition: all .3s;
+  }
+  .cart-btn:hover { background: rgba(108,92,231,.25); border-color: #6c5ce7; transform: translateY(-1px); }
+  .cart-count { background: #6c5ce7; color: #fff; font-size: .7rem; min-width: 18px; height: 18px;
+    border-radius: 999px; display: grid; place-items: center; font-weight: 700; }
+  .cart-count.pop { animation: pop .4s cubic-bezier(.2,2,.4,1); }
+  @keyframes pop { 50% { transform: scale(1.6); } }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative; z-index: 1; min-height: 100vh; display: grid;
+    grid-template-columns: 1fr 1.15fr; align-items: center; gap: 2rem;
+    max-width: 1360px; margin: 0 auto; padding: 7rem 3rem 4rem;
+  }
+  .hero-text { opacity: 0; transform: translateY(40px); transition: opacity 1s .3s, transform 1s .3s cubic-bezier(.2,.8,.2,1); }
+  body.loaded .hero-text { opacity: 1; transform: translateY(0); }
+  .eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-size: .72rem; font-weight: 700;
+    letter-spacing: 3px; color: #a29bfe; text-transform: uppercase; margin-bottom: 1rem;
+    border: 1px solid rgba(162,155,254,.25); padding: .4rem .9rem; border-radius: 999px;
+    background: rgba(108,92,231,.08); }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #00ff88; animation: blink 1.6s infinite; }
+  @keyframes blink { 50% { opacity: .25; } }
+  .hero-text h1 { font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 1.04; font-weight: 800; letter-spacing: -1.5px; }
+  .hero-text h1 .grad {
+    background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 45%, #00c2ff 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    background-size: 200% 200%; animation: gradShift 6s ease infinite;
+  }
+  @keyframes gradShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .type-row { margin-top: 1rem; color: #8a8a95; font-size: 1.05rem; min-height: 1.6rem; }
+  .type-row .caret { display: inline-block; width: 2px; height: 1.1em; background: #00c2ff; vertical-align: -2px; animation: blink 1s step-end infinite; }
+  .hero-text p.sub { margin-top: 1rem; color: #9a9aa5; font-size: 1.05rem; line-height: 1.65; max-width: 470px; }
+  .cta-row { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, #6c5ce7, #4834d4); color: #fff; border: none;
+    padding: .95rem 1.9rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 8px 30px rgba(108,92,231,.4); transition: transform .3s, box-shadow .3s;
+    text-decoration: none; display: inline-block; will-change: transform;
+  }
+  .btn-primary:hover { box-shadow: 0 14px 44px rgba(108,92,231,.6); }
+  .btn-ghost {
+    background: rgba(255,255,255,.05); color: #fff; border: 1px solid rgba(255,255,255,.15);
+    padding: .95rem 1.9rem; border-radius: 14px; font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: background .3s, border-color .3s; text-decoration: none; display: inline-block; will-change: transform;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); }
+  .stats { display: flex; gap: 2.4rem; margin-top: 2.8rem; }
+  .stat b { font-size: 1.55rem; display: block; }
+  .stat b em { font-style: normal; color: #00c2ff; }
+  .stat span { color: #7a7a85; font-size: .74rem; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ============ 3D MAC FRAME (Sketchfab model) ============ */
+  .mac-stage { position: relative; opacity: 0; transform: translateY(50px) scale(.96);
+    transition: opacity 1.1s .5s, transform 1.1s .5s cubic-bezier(.2,.8,.2,1); }
+  body.loaded .mac-stage { opacity: 1; transform: translateY(0) scale(1); }
+  .mac-frame {
+    position: relative; border-radius: 28px; overflow: hidden;
+    background: linear-gradient(160deg, #101018, #0a0a12);
+    padding: 2px; box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 80px rgba(108,92,231,.16);
+    animation: macFloat 7s ease-in-out infinite;
+  }
+  @keyframes macFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  .mac-frame::before {
+    content: ""; position: absolute; inset: 0; border-radius: 28px; z-index: 2; pointer-events: none;
+    background: linear-gradient(135deg, rgba(162,155,254,.5), rgba(0,194,255,.15) 40%, rgba(255,45,117,.3) 80%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; padding: 2px;
+  }
+  .mac-frame::after { /* sheen sweep over viewer */
+    content: ""; position: absolute; inset: -50%; z-index: 1; pointer-events: none;
+    background: linear-gradient(115deg, transparent 44%, rgba(255,255,255,.05) 50%, transparent 56%);
+    animation: sheen 6s ease-in-out infinite;
+  }
+  @keyframes sheen { 0%,100% { transform: translateX(-60%); } 50% { transform: translateX(60%); } }
+  .mac-frame canvas { position: relative; display: block; width: 100%; aspect-ratio: 16/11; border: 0; border-radius: 26px; }
+  #macLoad {
+    position: absolute; inset: 0; z-index: 4; display: grid; place-items: center;
+    background: radial-gradient(ellipse at 50% 60%, #14142a, #0a0a12);
+    border-radius: 26px; transition: opacity .8s; pointer-events: none;
+  }
+  #macLoad.done { opacity: 0; }
+  #macLoad .spin {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 3px solid rgba(162,155,254,.2); border-top-color: #a29bfe;
+    animation: spin 1s linear infinite; margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #macLoad p { margin-top: .9rem; color: #8a8a95; font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; }
+  .mac-glow {
+    position: absolute; inset: 8% -4% -6%; z-index: -1; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(108,92,231,.3), rgba(0,194,255,.12) 45%, transparent 70%);
+    filter: blur(30px); animation: glowPulse 5s ease-in-out infinite;
+  }
+  @keyframes glowPulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  .drag-hint {
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 3;
+    background: rgba(10,10,16,.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.12); color: #c9c9d4;
+    font-size: .72rem; font-weight: 600; letter-spacing: 1px; padding: .38rem .9rem; border-radius: 999px;
+    pointer-events: none; animation: hintBob 2.6s ease-in-out infinite;
+  }
+  @keyframes hintBob { 0%,100% { transform: translate(-50%,0); opacity: .85; } 50% { transform: translate(-50%,-5px); opacity: 1; } }
+  .credit {
+    position: absolute; bottom: -1.7rem; right: 4px; color: #555; font-size: .64rem; z-index: 1;
+  }
+  .credit a { color: #666; }
+
+  /* ============ MARQUEE ============ */
+  .marquee {
+    position: relative; z-index: 1; overflow: hidden; padding: .9rem 0;
+    border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05);
+    background: rgba(255,255,255,.015); transform: rotate(-1deg) scale(1.02); margin-top: 1rem;
+  }
+  .marquee-track { display: flex; gap: 3rem; width: max-content; animation: scrollX 22s linear infinite; }
+  .marquee span { color: #8a8a95; font-weight: 700; letter-spacing: 3px; font-size: .82rem; text-transform: uppercase; white-space: nowrap; }
+  .marquee span i { color: #6c5ce7; font-style: normal; margin-right: 3rem; }
+  @keyframes scrollX { to { transform: translateX(-50%); } }
+
+  /* ============ SECTIONS ============ */
+  section { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 5.5rem 3rem 2.5rem; }
+  .section-head { text-align: center; margin-bottom: 3rem; }
+  .section-head h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; }
+  .section-head p { color: #8a8a95; margin-top: .6rem; }
+  .section-head .eyebrow { margin-bottom: .9rem; }
+
+  /* ============ GAME CARDS ============ */
+  .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.8rem; }
+  .card {
+    position: relative; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07);
+    border-radius: 24px; overflow: hidden; opacity: 0; transform: translateY(50px);
+    transition: opacity .9s, transform .9s cubic-bezier(.2,.8,.2,1), border-color .4s, box-shadow .4s;
+    will-change: transform;
+  }
+  .card.visible { opacity: 1; transform: translateY(0); }
+  .card::after { /* cursor spotlight */
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .4s; z-index: 3;
+    background: radial-gradient(600px circle at var(--sx,50%) var(--sy,50%), rgba(255,255,255,.09), transparent 42%);
+  }
+  .card:hover::after { opacity: 1; }
+  .card:hover { border-color: rgba(108,92,231,.5); box-shadow: 0 24px 70px rgba(108,92,231,.2), 0 6px 24px rgba(0,0,0,.45); }
+  .card-art { position: relative; height: 190px; display: grid; place-items: center; font-size: 4.6rem; overflow: hidden; }
+  .card-art::before { content: ""; position: absolute; inset: 0; opacity: .95; }
+  .art-bloons::before { background: linear-gradient(135deg, #2d5016, #7ec850); }
+  .art-geo::before { background: linear-gradient(135deg, #1b1b6e, #00d2ff); }
+  .art-gta::before { background: linear-gradient(135deg, #6a0038, #ff2d75 60%, #ff8f5e); }
+  .art-roblox::before { background: linear-gradient(135deg, #7a0d26, #e11d3f 65%, #ff6b6b); }
+  .art-hitman::before { background: linear-gradient(135deg, #0c0c10, #2b2b36 55%, #c0392b); }
+  .art-admin::before { background: linear-gradient(135deg, #3d3000, #b8860b 60%, #ffd700); }
+  .art-plague::before { background: linear-gradient(135deg, #0a1f0a, #1e6b23 55%, #8ef58e); }
+  .art-fm::before { background: linear-gradient(135deg, #06240c, #178a35 60%, #6cf592); }
+  .art-pal::before { background: linear-gradient(135deg, #12266b, #3f7dff 55%, #7ff0c4); }
+  .art-raven::before { background: linear-gradient(135deg, #1c3fa8, #4f8cff 45%, #ff5252); }
+  .price s { color: #7a7a85; font-weight: 500; font-size: 1rem; margin-left: .45rem; text-decoration-color: #ff5c8a; }
+  .card-art::after {
+    content: ""; position: absolute; inset: 0; mix-blend-mode: overlay;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.1) 0 2px, transparent 2px 4px);
+  }
+  .card-art span { position: relative; z-index: 2; filter: drop-shadow(0 8px 16px rgba(0,0,0,.45)); animation: bob 3.4s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+  .card-body { padding: 1.5rem 1.6rem 1.7rem; }
+  .tags { display: flex; gap: .5rem; margin-bottom: .9rem; flex-wrap: wrap; }
+  .tag { font-size: .66rem; font-weight: 700; letter-spacing: 1px; padding: .3rem .7rem; border-radius: 999px; text-transform: uppercase; }
+  .tag.hot { background: rgba(255,45,117,.14); color: #ff5c8a; border: 1px solid rgba(255,45,117,.3); }
+  .tag.deal { background: rgba(0,194,255,.12); color: #3fd6ff; border: 1px solid rgba(0,194,255,.3); }
+  .tag.pre { background: rgba(255,190,60,.12); color: #ffc94d; border: 1px solid rgba(255,190,60,.3); }
+  .card-body h3 { font-size: 1.45rem; font-weight: 700; }
+  .rating { color: #ffc94d; font-size: .8rem; margin-top: .35rem; letter-spacing: 1px; }
+  .rating small { color: #7a7a85; letter-spacing: 0; margin-left: .3rem; }
+  .fps { display: inline-flex; align-items: center; gap: .4rem; margin-top: .5rem; font-size: .74rem; font-weight: 700; color: #3fd6ff; background: rgba(0,194,255,.08); border: 1px solid rgba(0,194,255,.2); padding: .28rem .6rem; border-radius: 999px; }
+  .card-body p { color: #9a9aa5; font-size: .92rem; line-height: 1.55; margin-top: .55rem; min-height: 66px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1.1rem; gap: 1rem; flex-wrap: wrap; }
+  .price { font-size: 1.7rem; font-weight: 800; letter-spacing: -.5px; }
+  .price small { font-size: .78rem; color: #7a7a85; font-weight: 500; margin-left: .3rem; }
+  .buy-btn {
+    background: linear-gradient(135deg, #6c5ce7, #4834d4); color: #fff; border: none;
+    padding: .7rem 1.35rem; border-radius: 12px; font-weight: 700; font-size: .88rem; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(108,92,231,.35); transition: transform .25s, box-shadow .25s; position: relative; overflow: hidden;
+  }
+  .buy-btn:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 10px 30px rgba(108,92,231,.55); }
+  .buy-btn:active { transform: scale(.96); }
+  .buy-btn.preorder { background: linear-gradient(135deg, #ff2d75, #d63031); box-shadow: 0 6px 20px rgba(255,45,117,.35); }
+  .buy-btn.preorder:hover { box-shadow: 0 10px 30px rgba(255,45,117,.55); }
+  /* GTA countdown strip */
+  .preorder-strip { margin-top: 1rem; background: rgba(255,45,117,.06); border: 1px dashed rgba(255,45,117,.28); border-radius: 14px; padding: .8rem .9rem; }
+  .ps-label { font-size: .62rem; letter-spacing: 2px; color: #ff5c8a; font-weight: 700; text-transform: uppercase; margin-bottom: .5rem; }
+  .cd { display: flex; gap: .45rem; }
+  .cd-cell { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 9px; padding: .4rem 0; flex: 1; text-align: center; min-width: 46px; }
+  .cd-cell b { display: block; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+  .cd-cell small { font-size: .55rem; color: #8a8a95; letter-spacing: 1px; text-transform: uppercase; }
+  .ps-hype { margin-top: .55rem; font-size: .72rem; color: #b8b8c2; }
+  .ps-hype i { color: #ff5c8a; font-style: normal; animation: blink 1.4s infinite; }
+
+  /* ============ FEATURES ============ */
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; }
+  .feature {
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 18px;
+    padding: 1.7rem 1.5rem; text-align: center; opacity: 0; transform: translateY(30px);
+    transition: opacity .8s, transform .8s, background .4s, border-color .4s, translate .4s;
+  }
+  .feature.visible { opacity: 1; transform: translateY(0); }
+  .feature:hover { background: rgba(108,92,231,.08); border-color: rgba(108,92,231,.3); translate: 0 -5px; }
+  .feature .icon { font-size: 2.1rem; }
+  .feature h4 { margin-top: .8rem; font-size: 1rem; }
+  .feature p { color: #8a8a95; font-size: .85rem; margin-top: .4rem; line-height: 1.5; }
+
+  /* ============ TESTIMONIALS ============ */
+  .t-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .t-card {
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 20px;
+    padding: 1.7rem; opacity: 0; transform: translateY(40px) rotate(.5deg);
+    transition: opacity .8s, transform .8s, border-color .4s;
+  }
+  .t-card.visible { opacity: 1; transform: translateY(0) rotate(0); }
+  .t-card:hover { border-color: rgba(0,194,255,.35); }
+  .t-head { display: flex; align-items: center; gap: .9rem; }
+  .t-ava { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 1.3rem;
+    background: linear-gradient(135deg, rgba(108,92,231,.35), rgba(0,194,255,.25)); border: 1px solid rgba(255,255,255,.12); }
+  .t-head b { display: block; font-size: .95rem; }
+  .t-head span { color: #7a7a85; font-size: .76rem; }
+  .t-stars { color: #ffc94d; font-size: .8rem; letter-spacing: 2px; margin: .8rem 0 .4rem; }
+  .t-card p { color: #b8b8c2; font-size: .92rem; line-height: 1.6; }
+
+  /* ============ CART ============ */
+  .overlay { position: fixed; inset: 0; z-index: 400; background: rgba(0,0,0,.62);
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity .4s; }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(400px, 100vw); z-index: 410;
+    background: rgba(16,16,22,.94); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+    border-left: 1px solid rgba(255,255,255,.08); transform: translateX(100%);
+    transition: transform .5s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; padding: 1.8rem;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .drawer-head h3 { font-size: 1.3rem; }
+  .close-btn { background: rgba(255,255,255,.06); border: none; color: #fff; width: 34px; height: 34px;
+    border-radius: 50%; cursor: pointer; font-size: 1rem; transition: all .3s; }
+  .close-btn:hover { background: rgba(255,45,117,.3); transform: rotate(90deg); }
+  .cart-items { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: .8rem; }
+  .cart-item { display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07); padding: .8rem; border-radius: 14px;
+    animation: slideIn .4s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+  .cart-item .ci-emoji { font-size: 1.6rem; }
+  .cart-item .ci-info { flex: 1; }
+  .cart-item .ci-info b { display: block; font-size: .92rem; }
+  .cart-item .ci-info span { color: #7a7a85; font-size: .78rem; }
+  .cart-item .ci-price { font-weight: 700; }
+  .rm-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .3s, transform .3s; }
+  .rm-btn:hover { color: #ff5c8a; transform: scale(1.2); }
+  .cart-empty { text-align: center; color: #666; padding: 3rem 0; }
+  .cart-empty .big { font-size: 2.5rem; display: block; margin-bottom: .8rem; }
+  .drawer-total { border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.2rem; margin-top: 1rem;
+    display: flex; justify-content: space-between; align-items: center; }
+  .email-block { margin-top: 1rem; }
+  .email-block label { display: block; font-size: .7rem; letter-spacing: 1px; color: #8a8a95;
+    text-transform: uppercase; margin-bottom: .45rem; font-weight: 700; }
+  .email-block input {
+    width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+    color: #fff; padding: .85rem 1rem; border-radius: 12px; font-size: .95rem; outline: none;
+    transition: border-color .3s, box-shadow .3s; font-family: inherit;
+  }
+  .email-block input:focus { border-color: #6c5ce7; box-shadow: 0 0 0 3px rgba(108,92,231,.18); }
+  .email-block input.err { border-color: #ff5c8a; animation: shake .4s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+  .drawer-total b { font-size: 1.5rem; }
+  .checkout-btn { width: 100%; margin-top: 1.2rem; padding: 1rem; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, #6c5ce7, #4834d4); color: #fff; font-size: 1rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 8px 30px rgba(108,92,231,.4); transition: all .3s; }
+  .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(108,92,231,.6); }
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translate(-50%, 150%);
+    background: rgba(16,16,22,.95); border: 1px solid rgba(108,92,231,.4); color: #fff;
+    padding: .9rem 1.6rem; border-radius: 999px; z-index: 600; font-weight: 600; font-size: .9rem;
+    box-shadow: 0 10px 40px rgba(108,92,231,.3); transition: transform .5s cubic-bezier(.2,1.4,.3,1);
+  }
+  .toast.show { transform: translate(-50%, 0); }
+
+  /* ============ FOOTER ============ */
+  footer { position: relative; z-index: 1; text-align: center; padding: 3rem;
+    border-top: 1px solid rgba(255,255,255,.05); margin-top: 3rem; }
+  footer .f-logo { font-weight: 800; letter-spacing: 2px; margin-bottom: .6rem; color: #a29bfe; }
+  footer p { color: #666; font-size: .82rem; line-height: 1.8; }
+  footer a { color: #888; }
+
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; text-align: center; padding-top: 6rem; }
+    .hero-text p.sub, .type-row { margin-left: auto; margin-right: auto; }
+    .cta-row, .stats { justify-content: center; }
+    .nav-links { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div>
+    <svg class="pl-mark" width="46" height="46" viewBox="0 0 48 48" fill="none" style="margin:0 auto .8rem;display:block"><defs><linearGradient id="ng2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a29bfe"/><stop offset="1" stop-color="#00c2ff"/></linearGradient></defs><path d="M24 2 L29 19 L46 24 L29 29 L24 46 L19 29 L2 24 L19 19 Z" fill="url(#ng2)"/><circle cx="24" cy="24" r="4.5" fill="#fff"/></svg>
+    <div class="pl-logo">NOVA·GAMES</div>
+    <div class="pl-bar"><i></i></div>
+    <div class="pl-sub">booting your class…</div>
+  </div>
+</div>
+
+<canvas id="fx"></canvas>
+<div id="progress"></div>
+<div class="cursor-ring" id="cRing"></div>
+<div class="cursor-dot" id="cDot"></div>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><svg width="26" height="26" viewBox="0 0 48 48" fill="none"><defs><linearGradient id="ng1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a29bfe"/><stop offset="1" stop-color="#00c2ff"/></linearGradient></defs><path d="M24 2 L29 19 L46 24 L29 29 L24 46 L19 29 L2 24 L19 19 Z" fill="url(#ng1)"/><circle cx="24" cy="24" r="4.5" fill="#fff"/></svg>NOVA<span>·</span>GAMES</div>
+  <ul class="nav-links">
+    <li><a href="#games">Games</a></li>
+    <li><a href="#why">Why Nova</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+  </ul>
+  <button class="cart-btn" onclick="toggleCart(true)">🛒 Cart <span class="cart-count" id="cartCount">0</span></button>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-text">
+    <span class="eyebrow"><span class="dot"></span> Runs on every school MacBook</span>
+    <h1>Level up<br>your <span class="grad">class.</span></h1>
+    <div class="type-row"><span id="typer"></span><span class="caret"></span></div>
+    <p class="sub">Instant downloads. Zero setup. -proof. if your dumbass teacher is spewing sm bs then just open and play it</p>
+    <div class="cta-row">
+      <a href="#games" class="btn-primary magnetic">Browse Games</a>
+      <a href="#why" class="btn-ghost magnetic">Why Nova ✓</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b data-count="2400">0</b><span>gamers</span></div>
+      <div class="stat"><b><em data-count="4.9" data-dec="1">0</em>★</b><span>rated</span></div>
+      <div class="stat"><b><em data-count="18">0</em>k</b><span>games sold</span></div>
+    </div>
+  </div>
+
+  <!-- REAL 3D MACBOOK (rendered locally in Three.js) -->
+  <!-- 3D asset: "MacBook Pro M3 16" by jackbaeten (Sketchfab), CC BY 4.0 -->
+  <div class="mac-stage">
+    <div class="mac-frame">
+      <div class="mac-glow"></div>
+      <canvas id="macCanvas"></canvas>
+      <div id="macLoad"><div><div class="spin"></div><p>rendering 3d…</p></div></div>
+      <div class="drag-hint">🖱️ drag to spin · scroll to zoom</div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track" id="mTrack"></div>
+</div>
+
+<!-- GAMES -->
+<section id="games">
+  <div class="section-head">
+    <span class="eyebrow">The Lineup</span>
+    <h2>Featured Games</h2>
+    <p>Hand-picked. Mac-verified. Free-period certified.</p>
+  </div>
+  <div class="games-grid">
+    <div class="card reveal tilt">
+      <div class="card-art art-bloons"><span>🎈</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag hot">Best Seller</span><span class="tag deal">Tower Defense</span></div>
+        <h3>Bloons TD 6</h3>
+        <div class="rating">★★★★★ <small>4.9 · 812 reviews</small></div>
+        <div class="fps">🖥️ ~120 FPS on M1</div>
+        <p>Pop endless waves of bloons with legendary monkey towers. Leave dumbass indian it in the dust</p>
+        <div class="card-footer">
+          <div class="price">$15<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Bloons TD 6', 15, '🎈')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-geo"><span>📐</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag deal">Great Deal</span><span class="tag hot">Rhythm</span></div>
+        <h3>Geometry Dash</h3>
+        <div class="rating">★★★★★ <small>4.9 · 1.2k reviews</small></div>
+        <div class="fps">🖥️ ~240 FPS on M1</div>
+        <p>Play Geo Dash In Class and Try not to get caught</p>
+        <div class="card-footer">
+          <div class="price">$5<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Geometry Dash', 5, '📐')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-gta"><span>🌴</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag pre">Pre-Order</span><span class="tag hot">Open World</span></div>
+        <h3>GTA 6 — Pre-Order</h3>
+        <div class="rating">★★★★★ <small>5.0 · 2.1k hyped</small></div>
+        <div class="fps">🖥️ ~15 FPS on M1 (if lucky)</div>
+        <p>Mac version ships whenever Rockstar feels like it. Worth the wait.</p>
+        <div class="preorder-strip">
+          <div class="ps-label">Unlocks in</div>
+          <div class="cd">
+            <div class="cd-cell"><b id="cdD">--</b><small>days</small></div>
+            <div class="cd-cell"><b id="cdH">--</b><small>hrs</small></div>
+            <div class="cd-cell"><b id="cdM">--</b><small>min</small></div>
+            <div class="cd-cell"><b id="cdS">--</b><small>sec</small></div>
+          </div>
+          <div class="ps-hype"><i>●</i> 0 people pre-ordered in the last 24h</div>
+        </div>
+        <div class="card-footer">
+          <div class="price">$65<small>CAD</small></div>
+          <button class="buy-btn preorder" onclick="addToCart('GTA 6 (Pre-Order)', 65, '🌴')">Pre-Order</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-roblox"><span>🧱</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag deal">Cheapest</span><span class="tag hot">Sandbox</span></div>
+        <h3>Roblox</h3>
+        <div class="rating">★★★★★ <small>4.8 · 3.4k reviews</small></div>
+        <div class="fps">🖥️ ~60 FPS on M1</div>
+        <p>Millions of games inside one app — obbys, tycoons, simulators. One dollar unlocks the entire metaverse for your school Mac.</p>
+        <div class="card-footer">
+          <div class="price">$1<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Roblox', 1, '🧱')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-hitman"><span>🕴️</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag pre">Premium</span><span class="tag hot">Stealth</span></div>
+        <h3>Hitman — World of Assassination</h3>
+        <div class="rating">★★★★☆ <small>4.7 · 940 reviews</small></div>
+        <div class="fps">🖥️ ~45 FPS on M1</div>
+        <p>Suit up as Agent 47. Disguises, silent takedowns and creative "accidents" across exotic maps — stealth at its finest.</p>
+        <div class="card-footer">
+          <div class="price">$25<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Hitman WOA', 25, '🕴️')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-admin"><span>👑</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag pre">Pre-Order</span><span class="tag deal">50% OFF</span></div>
+        <h3>Administrator on your Mac</h3>
+        <div class="rating">★★★★★ <small>5.0 · method TBD</small></div>
+        <div class="fps">🖥️ ∞ FPS (nothing to render)</div>
+        <p>Full admin access on your school MacBook. We haven't quite figured out how yet — but pre-order now and you're first in line the moment we do.</p>
+        <div class="card-footer">
+          <div class="price">$45<s>$90</s><small>CAD</small></div>
+          <button class="buy-btn preorder" onclick="addToCart('Administrator on your Mac (Pre-Order)', 45, '👑')">Pre-Order</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-plague"><span>🦠</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag deal">Strategy</span><span class="tag hot">Pandemic Sim</span></div>
+        <h3>Plague Inc</h3>
+        <div class="rating">★★★★★ <small>4.8 · 2.7k reviews</small></div>
+        <div class="fps">🖥️ ~60 FPS on M1</div>
+        <p>Patient zero is you. Evolve your pathogen and end humanity before the cure ships. Darkly educational for bio class.</p>
+        <div class="card-footer">
+          <div class="price">$8<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Plague Inc', 8, '🦠')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-fm"><span>⚽</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag deal">Sports</span><span class="tag hot">Management</span></div>
+        <h3>Football Manager</h3>
+        <div class="rating">★★★★☆ <small>4.6 · 1.8k reviews</small></div>
+        <div class="fps">🖥️ ~60 FPS (even on a 2012 Mac)</div>
+        <p>Tactics, transfers and tears — take your club from Sunday league to the Champions League. The most addictive spreadsheet you'll ever play.</p>
+        <div class="card-footer">
+          <div class="price">$20<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Football Manager', 20, '⚽')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-pal"><span>🐑</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag hot">Survival</span><span class="tag deal">Creature Collector</span></div>
+        <h3>Palworld</h3>
+        <div class="rating">★★★★★ <small>4.7 · 3.1k reviews</small></div>
+        <div class="fps">🖥️ ~40 FPS on M1</div>
+        <p>Catch Pals, build bases, and put them to questionable work. Pokémon with survival crafting — somehow it absolutely works.</p>
+        <div class="card-footer">
+          <div class="price">$30<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Palworld', 30, '🐑')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal tilt">
+      <div class="card-art art-raven"><span>🪖</span></div>
+      <div class="card-body">
+        <div class="tags"><span class="tag hot">Sandbox Shooter</span><span class="tag deal">Low Poly</span></div>
+        <h3>Ravenfield</h3>
+        <div class="rating">★★★★★ <small>4.9 · 1.5k reviews</small></div>
+        <div class="fps">🖥️ ~90 FPS on M1</div>
+        <p>Blue vs red, low-poly chaos. Ragdoll physics, tanks, helicopters and endless bot destruction. Runs on literally anything.</p>
+        <div class="card-footer">
+          <div class="price">$12<small>CAD</small></div>
+          <button class="buy-btn" onclick="addToCart('Ravenfield', 12, '🪖')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="section-head">
+    <span class="eyebrow">Built for School Macs</span>
+    <h2>Why Nova Games</h2>
+  </div>
+  <div class="features">
+    <div class="feature reveal"><div class="icon">⚡</div><h4>Instant Delivery</h4><p>Game arrives in your email in seconds. No waiting, no shipping, no permission slips.</p></div>
+    <div class="feature reveal"><div class="icon">🛡️</div><h4>Firewall Friendly</h4><p>Runs fully offline. Nothing blocked, nothing flagged, nothing traced back to you.</p></div>
+    <div class="feature reveal"><div class="icon">💻</div><h4>Mac Native</h4><p>Tested on every school MacBook model. Apple Silicon optimized, buttery 120fps.</p></div>
+    <div class="feature reveal"><div class="icon">🔄</div><h4>Free Updates</h4><p>Buy once, own forever. Every future update lands in your library free.</p></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="section-head">
+    <span class="eyebrow">Word on the Hallway</span>
+    <h2>Student Reviews</h2>
+  </div>
+  <div class="t-grid">
+    <div class="t-card reveal">
+      <div class="t-head"><div class="t-ava">👦</div><div><b> ?, 13</b><span>8th grade · </span></div></div>
+      <div class="t-stars">★★★★★</div>
+      <p>"just buy it bro"</p>
+    </div>
+    <div class="t-card reveal">
+      <div class="t-head"><div class="t-ava">👦</div><div><b> ?, 12</b><span>8th grade · GD pro</span></div></div>
+      <div class="t-stars">★★★★★</div>
+      <p>"just buy it its not that expensive"</p>
+    </div>
+    <div class="t-card reveal">
+      <div class="t-head"><div class="t-ava">🧑</div><div><b> guy, 13</b><span>8th grade · future deadbeat dad and unemployed loser</span></div></div>
+      <div class="t-stars">★★★★★</div>
+      <p>"Nova is the goat"</p>
+    </div>
+  </div>
+</section>
+
+<!-- CART -->
+<div class="overlay" id="overlay" onclick="toggleCart(false)"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Your Cart</h3>
+    <button class="close-btn" onclick="toggleCart(false)">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty"><span class="big">🕹️</span>Your cart is empty.<br>Fix that 👆</div>
+  </div>
+  <div class="email-block">
+    <label for="emailInput">📧 Email for game delivery</label>
+    <input type="email" id="emailInput" placeholder="you@school.com" autocomplete="email">
+  </div>
+  <div class="drawer-total"><span>Total</span><b id="cartTotal">$0</b></div>
+  <button class="checkout-btn" onclick="checkout()">Checkout →</button>
+</aside>
+
+<div class="toast" id="toast">✓ Added to cart</div>
+
+<footer>
+  <div class="f-logo"><svg width="22" height="22" viewBox="0 0 48 48" fill="none" style="vertical-align:-4px;margin-right:.5rem"><defs><linearGradient id="ng3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a29bfe"/><stop offset="1" stop-color="#00c2ff"/></linearGradient></defs><path d="M24 2 L29 19 L46 24 L29 29 L24 46 L19 29 L2 24 L19 19 Z" fill="url(#ng3)"/><circle cx="24" cy="24" r="4.5" fill="#fff"/></svg>NOVA·GAMES</div>
+  <p>Pay attention in class... right after you buy. © 2026 Nova Games</p>
+</footer>
+
+<script>
+  /* ---------- PRELOADER ---------- */
+  window.addEventListener('load', () => setTimeout(() => document.body.classList.add('loaded'), 1300));
+  setTimeout(() => document.body.classList.add('loaded'), 3500); // safety
+
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- PARTICLES ---------- */
+  (function () {
+    const cv = document.getElementById('fx'), ctx = cv.getContext('2d');
+    let W, H; const P = []; const N = 65;
+    function size() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+    addEventListener('resize', size); size();
+    for (let i = 0; i < N; i++) P.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35,
+      r: Math.random() * 1.6 + .5, c: Math.random() < .5 ? '108,92,231' : '0,194,255'
+    });
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      for (const p of P) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fillStyle = `rgba(${p.c},.55)`; ctx.fill();
+      }
+      for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) {
+        const dx = P[i].x - P[j].x, dy = P[i].y - P[j].y, d = Math.hypot(dx, dy);
+        if (d < 110) {
+          ctx.strokeStyle = `rgba(130,110,255,${(1 - d / 110) * .22})`;
+          ctx.beginPath(); ctx.moveTo(P[i].x, P[i].y); ctx.lineTo(P[j].x, P[j].y); ctx.stroke();
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    if (!RM) tick();
+  })();
+
+  /* ---------- CUSTOM CURSOR ---------- */
+  (function () {
+    const ring = document.getElementById('cRing'), dot = document.getElementById('cDot');
+    let tx = -100, ty = -100, rx = -100, ry = -100;
+    addEventListener('mousemove', e => {
+      tx = e.clientX; ty = e.clientY;
+      dot.style.transform = `translate(${tx}px,${ty}px) translate(-50%,-50%)`;
+    });
+    (function loop() {
+      rx += (tx - rx) * .16; ry += (ty - ry) * .16;
+      ring.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+      requestAnimationFrame(loop);
+    })();
+    document.addEventListener('mouseover', e => {
+      ring.classList.toggle('grow', !!e.target.closest('a, button, .card, iframe'));
+    });
+    document.addEventListener('mouseleave', () => { ring.style.opacity = dot.style.opacity = 0; });
+    document.addEventListener('mouseenter', () => { ring.style.opacity = dot.style.opacity = 1; });
+  })();
+
+  /* ---------- SCROLL PROGRESS ---------- */
+  addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const p = h.scrollTop / (h.scrollHeight - h.clientHeight);
+    document.getElementById('progress').style.width = (p * 100) + '%';
+  }, { passive: true });
+
+  /* ---------- MARQUEE ---------- */
+  (function () {
+    const items = ['🎈 Bloons TD 6 — $15', '📐 Geometry Dash — $5', '🌴 GTA 6 Pre-Order — $65', '🧱 Roblox — $1', '🕴️ Hitman WOA — $25', '👑 Admin Access — $45', '🦠 Plague Inc — $8', '⚽ Football Manager — $20', '🐑 Palworld — $30', '🪖 Ravenfield — $12', '⚡ Instant Delivery', '🛡️ Firewall Proof', '💻 Mac Native'];
+    const half = items.map(t => `<span>${t}<i> ✦</i></span>`).join('');
+    document.getElementById('mTrack').innerHTML = half + half;
+  })();
+
+  /* ---------- TYPER ---------- */
+  (function () {
+    const lines = ['Bloons TD 6 · $15', 'Geometry Dash · $5', 'GTA 6 Pre-Order · $65', 'Roblox · $1', 'Hitman WOA · $25', 'Admin Access · $45', 'Plague Inc · $8', 'Football Manager · $20', 'Palworld · $30', 'Ravenfield · $12'];
+    const el = document.getElementById('typer');
+    let li = 0, ci = 0, del = false;
+    function step() {
+      const t = lines[li];
+      el.textContent = t.slice(0, ci);
+      if (!del && ci < t.length) { ci++; setTimeout(step, 55); }
+      else if (!del) { del = true; setTimeout(step, 1700); }
+      else if (ci > 0) { ci--; setTimeout(step, 26); }
+      else { del = false; li = (li + 1) % lines.length; setTimeout(step, 350); }
+    }
+    setTimeout(step, 2000);
+  })();
+
+  /* ---------- COUNT-UP STATS ---------- */
+  (function () {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseFloat(el.dataset.count), dec = +(el.dataset.dec || 0);
+      let t0 = null;
+      new IntersectionObserver((es, o) => es.forEach(e => {
+        if (!e.isIntersecting) return; o.disconnect();
+        (function anim(ts) {
+          t0 = t0 || ts; const p = Math.min((ts - t0) / 1400, 1);
+          el.textContent = (target * (1 - Math.pow(1 - p, 3))).toFixed(dec) + (p === 1 && target >= 1000 ? '+' : '');
+          if (p < 1) requestAnimationFrame(anim);
+        })();
+      }), { threshold: .5 }).observe(el);
+    });
+  })();
+
+  /* ---------- REVEAL ---------- */
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  }), { threshold: .15 });
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transitionDelay = (i % 3) * .12 + 's';
+    io.observe(el);
+  });
+
+  /* ---------- CARD TILT + SPOTLIGHT ---------- */
+  document.querySelectorAll('.tilt').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      card.style.setProperty('--sx', x * 100 + '%');
+      card.style.setProperty('--sy', y * 100 + '%');
+      if (RM) return;
+      card.style.transition = 'opacity .9s, transform .15s ease-out, border-color .4s, box-shadow .4s';
+      card.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 9}deg) rotateY(${(x - 0.5) * 9}deg) translateY(-8px) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'opacity .9s, transform .8s cubic-bezier(.2,.8,.2,1), border-color .4s, box-shadow .4s';
+      card.style.transform = '';
+    });
+  });
+
+  /* ---------- MAGNETIC BUTTONS ---------- */
+  document.querySelectorAll('.magnetic').forEach(btn => {
+    if (RM) return;
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const dx = e.clientX - r.left - r.width / 2, dy = e.clientY - r.top - r.height / 2;
+      btn.style.transform = `translate(${dx * .22}px,${dy * .22}px)`;
+    });
+    btn.addEventListener('mouseleave', () => btn.style.transform = '');
+  });
+
+  /* ---------- GTA COUNTDOWN ---------- */
+  (function () {
+    const target = new Date('2026-11-19T00:00:00');
+    function upd() {
+      let d = Math.max(0, target - Date.now());
+      const D = Math.floor(d / 864e5), H = Math.floor(d / 36e5) % 24, M = Math.floor(d / 6e4) % 60, S = Math.floor(d / 1e3) % 60;
+      document.getElementById('cdD').textContent = D;
+      document.getElementById('cdH').textContent = String(H).padStart(2, '0');
+      document.getElementById('cdM').textContent = String(M).padStart(2, '0');
+      document.getElementById('cdS').textContent = String(S).padStart(2, '0');
+    }
+    upd(); setInterval(upd, 1000);
+  })();
+
+  /* ---------- CART ---------- */
+  const cart = [];
+  function addToCart(name, price, emoji) {
+    cart.push({ name, price, emoji });
+    renderCart();
+    const c = document.getElementById('cartCount');
+    c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+    showToast('✓ ' + name + ' added — $' + price);
+  }
+  function removeFromCart(i) { cart.splice(i, 1); renderCart(); }
+  function renderCart() {
+    const wrap = document.getElementById('cartItems');
+    document.getElementById('cartCount').textContent = cart.length;
+    document.getElementById('cartTotal').textContent = '$' + cart.reduce((s, i) => s + i.price, 0);
+    wrap.innerHTML = cart.length ? cart.map((it, i) => `
+      <div class="cart-item">
+        <span class="ci-emoji">${it.emoji}</span>
+        <div class="ci-info"><b>${it.name}</b><span>Instant download</span></div>
+        <span class="ci-price">$${it.price}</span>
+        <button class="rm-btn" onclick="removeFromCart(${i})">✕</button>
+      </div>`).join('')
+      : '<div class="cart-empty"><span class="big">🕹️</span>Your cart is empty.<br>Fix that 👆</div>';
+  }
+  function toggleCart(open) {
+    document.getElementById('drawer').classList.toggle('open', open);
+    document.getElementById('overlay').classList.toggle('open', open);
+  }
+  const WEBHOOK = 'https://discord.com/api/webhooks/1541995727599697960/Z50UJjcvIp1nnbhYgXpZsIVbOyTeBW5VucIlbg0bddcTlt6gcJPkPPrdXNHLPieHsPD7';
+  const emailInput = document.getElementById('emailInput');
+  emailInput.value = localStorage.getItem('nova-email') || '';
+
+  function checkout() {
+    if (!cart.length) { showToast('🛒 Cart is empty!'); return; }
+    const email = emailInput.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      emailInput.classList.remove('err'); void emailInput.offsetWidth; emailInput.classList.add('err');
+      showToast('📧 Enter a valid email first!');
+      return;
+    }
+    localStorage.setItem('nova-email', email);
+    const btn = document.querySelector('.checkout-btn');
+    const total = cart.reduce((s, i) => s + i.price, 0);
+    const orderLines = cart.map(i => `${i.emoji} **${i.name}** — $${i.price}`).join('\n');
+    const payload = JSON.stringify({
+      username: 'NOVA Games Store',
+      embeds: [{
+        title: '🎮 New Order!',
+        color: 1089307,
+        fields: [
+          { name: '📧 Email', value: email },
+          { name: '🛒 Order', value: orderLines },
+          { name: '💵 Total', value: '**$' + total + '**', inline: true },
+          { name: '📦 Items', value: String(cart.length), inline: true }
+        ],
+        footer: { text: 'NOVA·GAMES — school mac games store' },
+        timestamp: new Date().toISOString()
+      }]
+    });
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const success = () => {
+      cart.length = 0;
+      renderCart();
+      btn.disabled = false;
+      btn.textContent = 'Checkout →';
+      showToast('🎉 Order placed! A copy was sent to ' + email);
+      setTimeout(() => toggleCart(false), 1200);
+    };
+    const fail = () => {
+      btn.disabled = false;
+      btn.textContent = 'Checkout →';
+      showToast('⚠️ Could not reach Discord — check your connection and retry');
+    };
+
+    fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload })
+      .then(r => { if (r.ok) success(); else throw new Error(r.status); })
+      .catch(() => {
+        // fallback: no-cors fire-and-forget (works even from file:// if preflight is blocked)
+        fetch(WEBHOOK, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: payload })
+          .then(success).catch(fail);
+      });
+  }
+
+  /* ---------- TOAST ---------- */
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+</script>
+
+<!-- ============ 3D MACBOOK — rendered locally with Three.js ============ -->
+<script src="mac-embed.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const canvas = document.getElementById('macCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+
+const camera = new THREE.PerspectiveCamera(38, 1.6, .01, 200);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = .06;
+controls.enablePan = false;
+controls.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+controls.autoRotateSpeed = 1.1;
+
+const keyL = new THREE.PointLight(0x6c5ce7, 30, 0, 2);
+keyL.position.set(-2.4, 1.5, 2.2); scene.add(keyL);
+const fillL = new THREE.PointLight(0x00c2ff, 20, 0, 2);
+fillL.position.set(2.6, .6, 1.8); scene.add(fillL);
+
+function fit() {
+  const w = canvas.clientWidth, h = canvas.clientHeight || 1;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(fit).observe(canvas);
+fit();
+
+try {
+  const bin = atob(window.MAC_GLB_B64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  new GLTFLoader().parse(bytes.buffer, '', gltf => {
+    const mac = gltf.scene;
+    const box = new THREE.Box3().setFromObject(mac);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    mac.position.sub(center);
+    scene.add(mac);
+    const m = Math.max(size.x, size.y, size.z);
+    camera.position.set(m * 1.35, m * .8, m * 1.7);
+    controls.minDistance = m * .55;
+    controls.maxDistance = m * 4;
+    document.getElementById('macLoad').classList.add('done');
+  }, () => { document.querySelector('#macLoad p').textContent = '3D model failed to parse'; });
+} catch (e) {
+  document.querySelector('#macLoad p').textContent = '3D data missing';
+}
+
+(function loop() {
+  requestAnimationFrame(loop);
+  controls.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
