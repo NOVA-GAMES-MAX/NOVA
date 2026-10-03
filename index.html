@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOVA — School Mac Games Store</title>
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='14' fill='%23141416'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%23fff' font-family='Georgia,serif' font-weight='bold'>N</text></svg>">
+<title>N.O.V.A News — Network for Official and Verified Affairs</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -44,7 +46,7 @@
   }
   .cursor-ring.grow { width: 58px; height: 58px; background: rgba(108,92,231,.18); border-color: rgba(0,194,255,.9); }
   .cursor-dot { width: 5px; height: 5px; background: #00c2ff; transform: translate(-50%,-50%); }
-  @media (hover:hover) and (pointer:fine) { body, a, button, iframe { cursor: none; } }
+  @media (hover:hover) and (pointer:fine) { body.store-mode, body.store-mode a, body.store-mode button { cursor: none; } }
   @media not ((hover:hover) and (pointer:fine)) { .cursor-ring, .cursor-dot { display: none; } }
 
   /* ============ AMBIENT BG ============ */
@@ -379,20 +381,123 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   }
+
+  /* ============ NEWS DISGUISE ============ */
+  #store { display: none; }
+  body.store-mode #store { display: block; }
+  body.store-mode #news { display: none; }
+  #news { background: #f7f7f5; color: #141416; min-height: 100vh; opacity: 1; transition: opacity .35s; }
+  .nn-top { display: flex; justify-content: space-between; padding: .55rem 2rem; font-size: .72rem; color: #666; background: #fff; border-bottom: 1px solid #e3e3de; }
+  .nn-masthead { background: #fff; text-align: center; padding: 1.3rem 1rem 1rem; border-bottom: 3px double #141416; }
+  .nn-masthead h1 { font-family: Georgia, "Times New Roman", serif; font-size: 3rem; letter-spacing: 6px; }
+  .nn-masthead h1 span { color: #b8141e; }
+  .nn-tag { font-size: .66rem; letter-spacing: 3px; text-transform: uppercase; color: #666; margin-top: .35rem; }
+  .nn-nav { display: flex; align-items: center; justify-content: center; gap: 1.4rem; background: #141416; color: #fff; padding: .65rem 1.2rem; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  .nn-nav a { color: #e8e8e8; text-decoration: none; font-size: .74rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+  .nn-nav a:hover { color: #ffd84d; }
+  .nn-search { display: flex; margin-left: auto; }
+  .nn-search input { border: 1px solid #444; background: #1f1f22; color: #fff; padding: .42rem .85rem; border-radius: 999px 0 0 999px; font-size: .78rem; outline: none; width: 210px; font-family: inherit; }
+  .nn-search input:focus { border-color: #888; }
+  .nn-search button { border: 1px solid #444; border-left: 0; background: #b8141e; color: #fff; padding: .42rem .95rem; border-radius: 0 999px 999px 0; cursor: pointer; font-size: .78rem; font-weight: 700; }
+  .nn-note { text-align: center; background: #fffbe6; color: #7a6410; font-size: .75rem; padding: .45rem; display: none; }
+  .nn-note.show { display: block; }
+  .nn-ticker { background: #b8141e; color: #fff; overflow: hidden; white-space: nowrap; padding: .45rem 0; font-size: .78rem; font-weight: 600; }
+  .nn-ticker-track { display: inline-flex; gap: 3rem; width: max-content; animation: scrollX 32s linear infinite; }
+  .nn-main { max-width: 1200px; margin: 1.6rem auto 0; padding: 0 1.4rem; display: grid; grid-template-columns: 2.2fr 1fr; gap: 1.8rem; }
+  .nn-hero { background: #fff; border: 1px solid #e3e3de; border-radius: 10px; overflow: hidden; }
+  .nn-hero-img { height: 240px; display: grid; place-items: center; font-size: 5rem; }
+  .nn-hero-body { padding: 1.3rem 1.6rem 1.5rem; }
+  .nn-cat { display: inline-block; background: #b8141e; color: #fff; font-size: .6rem; font-weight: 800; letter-spacing: 2px; padding: .28rem .6rem; border-radius: 4px; text-transform: uppercase; }
+  .nn-hero-body h2 { font-family: Georgia, serif; font-size: 1.85rem; line-height: 1.18; margin: .8rem 0 .6rem; }
+  .nn-standfirst { color: #555; font-size: .95rem; line-height: 1.65; }
+  .nn-meta { margin-top: .8rem; font-size: .7rem; color: #999; }
+  .nn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.6rem; }
+  .nn-card { background: #fff; border: 1px solid #e3e3de; border-radius: 10px; overflow: hidden; transition: translate .3s, box-shadow .3s; }
+  .nn-card:hover { translate: 0 -4px; box-shadow: 0 12px 30px rgba(0,0,0,.1); }
+  .nn-card-img { height: 105px; display: grid; place-items: center; font-size: 2.6rem; }
+  .nn-card-body { padding: .85rem 1rem 1.05rem; }
+  .nn-card h3 { font-family: Georgia, serif; font-size: .98rem; line-height: 1.28; margin: .55rem 0; }
+  .nn-card p { font-size: .78rem; color: #666; line-height: 1.5; }
+  .nn-aside-box { background: #fff; border: 1px solid #e3e3de; border-radius: 10px; padding: 1.1rem 1.2rem; margin-bottom: 1.2rem; }
+  .nn-aside-box h4 { font-size: .72rem; letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid #141416; padding-bottom: .5rem; margin-bottom: .8rem; }
+  .nn-trend { display: flex; gap: .8rem; padding: .55rem 0; border-bottom: 1px solid #efefec; align-items: baseline; }
+  .nn-trend b { font-family: Georgia, serif; color: #b8141e; font-size: 1.1rem; min-width: 1.1rem; }
+  .nn-trend span { font-size: .82rem; line-height: 1.4; }
+  .nn-weather { font-size: .84rem; color: #555; line-height: 1.6; }
+  .nn-foot { background: #141416; color: #bbb; text-align: center; padding: 1.6rem; font-size: .72rem; line-height: 1.8; margin-top: 2rem; }
+  @media (max-width: 900px) {
+    .nn-main { grid-template-columns: 1fr; }
+    .nn-grid { grid-template-columns: 1fr 1fr; }
+    .nn-search input { width: 130px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- PRELOADER -->
-<div id="preloader">
-  <div>
-    <svg class="pl-mark" width="46" height="46" viewBox="0 0 48 48" fill="none" style="margin:0 auto .8rem;display:block"><defs><linearGradient id="ng2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a29bfe"/><stop offset="1" stop-color="#00c2ff"/></linearGradient></defs><path d="M24 2 L29 19 L46 24 L29 29 L24 46 L19 29 L2 24 L19 19 Z" fill="url(#ng2)"/><circle cx="24" cy="24" r="4.5" fill="#fff"/></svg>
-    <div class="pl-logo">NOVA·GAMES</div>
-    <div class="pl-bar"><i></i></div>
-    <div class="pl-sub">booting your class…</div>
+<!-- ============ NEWS DISGUISE (N.O.V.A News) ============ -->
+<div id="news">
+  <div class="nn-top"><span id="nnDate">Saturday, October 3, 2026</span><span>Today's Paper · World Edition</span></div>
+  <div class="nn-masthead">
+    <h1>N.O.V.A <span>NEWS</span></h1>
+    <div class="nn-tag">Network for Official and Verified Affairs</div>
   </div>
+  <div class="nn-nav">
+    <a href="#">World</a><a href="#">Politics</a><a href="#">Tech</a><a href="#">Business</a><a href="#">Sports</a><a href="#">Culture</a><a href="#">Science</a>
+    <div class="nn-search">
+      <input type="text" id="newsSearch" placeholder="Search N.O.V.A News…" autocomplete="off">
+      <button id="newsSearchBtn">Go</button>
+    </div>
+  </div>
+  <div class="nn-note" id="nnNote"></div>
+  <div class="nn-ticker"><div class="nn-ticker-track">
+    <span>Russia hits second major bridge in Ukraine's capital Kyiv</span><span>Tens of thousands protest across Spain over housing crisis</span><span>England thump Croatia 6-0 in Rijeka</span><span>Red Bull upgrade enlivens F1 in Malaysia</span><span>Medical plane with six on board missing off Massachusetts coast</span><span>Hawaii's 550-year-old Hōlei Sea Arch collapses</span>
+    <span>Russia hits second major bridge in Ukraine's capital Kyiv</span><span>Tens of thousands protest across Spain over housing crisis</span><span>England thump Croatia 6-0 in Rijeka</span><span>Red Bull upgrade enlivens F1 in Malaysia</span><span>Medical plane with six on board missing off Massachusetts coast</span><span>Hawaii's 550-year-old Hōlei Sea Arch collapses</span>
+  </div></div>
+
+  <div class="nn-main">
+    <div class="nn-col">
+      <article class="nn-hero">
+        <div class="nn-hero-img" style="background:linear-gradient(135deg,#2d3a6e,#5670c0 60%,#9db4f0)">🌉</div>
+        <div class="nn-hero-body">
+          <span class="nn-cat">Europe</span>
+          <h2>Russia Hits Second Major Bridge in Ukraine's Capital Kyiv</h2>
+          <p class="nn-standfirst">The strike on the Pivnichnyi (Northern) Bridge comes after repeated attacks on another major bridge in Ukraine's capital, in an escalation of attacks on the city's infrastructure.</p>
+          <div class="nn-meta">By N.O.V.A World Desk · 4 min read · Updated 7h ago</div>
+        </div>
+      </article>
+      <div class="nn-grid">
+        <div class="nn-card"><div class="nn-card-img" style="background:linear-gradient(135deg,#1a5b3a,#3fae6f)">✊</div><div class="nn-card-body"><span class="nn-cat" style="background:#1a5b3a">Europe</span><h3>'Anger in the streets': Tens of Thousands Protest in Spain Over Housing Crisis</h3><p>More than 50 protests took place on Saturday after the government failed to get emergency legislation through parliament.</p><div class="nn-meta">3 min read</div></div></div>
+        <div class="nn-card"><div class="nn-card-img" style="background:linear-gradient(135deg,#0f5f73,#3fb8d0)">✈️</div><div class="nn-card-body"><span class="nn-cat" style="background:#0f5f73">US & Canada</span><h3>Medical Plane With Six on Board Missing Off Massachusetts Coast</h3><p>A search operation is underway after the aircraft disappeared from radar during a flight along the Atlantic coastline.</p><div class="nn-meta">2 min read</div></div></div>
+        <div class="nn-card"><div class="nn-card-img" style="background:linear-gradient(135deg,#8a1f1f,#c94a4a)">⚽</div><div class="nn-card-body"><span class="nn-cat">Sports</span><h3>England Thump Croatia 6-0 as Bellingham 'Unlocks New Level'</h3><p>Jude Bellingham is now regarded as potentially one of England's "greatest of all time" after a dominant performance in Rijeka.</p><div class="nn-meta">4 min read</div></div></div>
+        <div class="nn-card"><div class="nn-card-img" style="background:linear-gradient(135deg,#4a3a8f,#7d6fd0)">🏎️</div><div class="nn-card-body"><span class="nn-cat" style="background:#4a3a8f">Formula 1</span><h3>'Incredible' Red Bull Upgrade Enlivens F1 in Malaysia</h3><p>Even Lewis Hamilton fears Max Verstappen will be tough to beat in Sunday's Grand Prix after a major car upgrade.</p><div class="nn-meta">3 min read</div></div></div>
+        <div class="nn-card"><div class="nn-card-img" style="background:linear-gradient(135deg,#5a4a1f,#b89a3f)">🌀</div><div class="nn-card-body"><span class="nn-cat" style="background:#5a4a1f">Science</span><h3>Could El Niño Mean There Are No Atlantic Hurricanes This Year?</h3><p>Climatologists examine whether the Pacific weather pattern is suppressing this season's Atlantic hurricane activity.</p><div class="nn-meta">5 min read</div></div></div>
+        <div class="nn-card"><div class="nn-card-img" style="background:linear-gradient(135deg,#555,#888)">🗿</div><div class="nn-card-body"><span class="nn-cat" style="background:#555">US & Canada</span><h3>Hawaii's Iconic 550-Year-Old Hōlei Sea Arch Collapses</h3><p>The lava rock formation in Volcanoes National Park crumbled some time last weekend, rangers confirmed.</p><div class="nn-meta">2 min read</div></div></div>
+      </div>
+    </div>
+    <aside class="nn-aside">
+      <div class="nn-aside-box">
+        <h4>Trending Today</h4>
+        <div class="nn-trend"><b>1</b><span>Russia hits second major bridge in Kyiv</span></div>
+        <div class="nn-trend"><b>2</b><span>England 6-0 Croatia — who was the best player on the pitch?</span></div>
+        <div class="nn-trend"><b>3</b><span>Medical plane missing off Massachusetts coast</span></div>
+        <div class="nn-trend"><b>4</b><span>Spain housing protests — will there be a snap election?</span></div>
+        <div class="nn-trend"><b>5</b><span>Kim wins Asian Games gold to secure military exemption</span></div>
+      </div>
+      <div class="nn-aside-box">
+        <h4>Weather</h4>
+        <p class="nn-weather">Partly cloudy · 14°C · light wind · rain expected by evening · full 7-day forecast in print edition</p>
+      </div>
+      <div class="nn-aside-box">
+        <h4>Subscribe</h4>
+        <p class="nn-standfirst" style="font-size:.82rem">Get N.O.V.A News delivered daily — trusted reporting on the stories that matter.</p>
+      </div>
+    </aside>
+  </div>
+  <footer class="nn-foot">© 2026 N.O.V.A News — Network for Official and Verified Affairs<br>All rights reserved. Reproduction without permission is prohibited.</footer>
 </div>
 
+<!-- ============ ACTUAL STORE (hidden until NOVA-GAMES.IO is typed) ============ -->
+<div id="store">
 <canvas id="fx"></canvas>
 <div id="progress"></div>
 <div class="cursor-ring" id="cRing"></div>
@@ -682,11 +787,43 @@
   <div class="f-logo"><svg width="22" height="22" viewBox="0 0 48 48" fill="none" style="vertical-align:-4px;margin-right:.5rem"><defs><linearGradient id="ng3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a29bfe"/><stop offset="1" stop-color="#00c2ff"/></linearGradient></defs><path d="M24 2 L29 19 L46 24 L29 29 L24 46 L19 29 L2 24 L19 19 Z" fill="url(#ng3)"/><circle cx="24" cy="24" r="4.5" fill="#fff"/></svg>NOVA·GAMES</div>
   <p>Pay attention in class... right after you buy. © 2026 Nova Games</p>
 </footer>
+</div><!-- /#store -->
 
 <script>
-  /* ---------- PRELOADER ---------- */
-  window.addEventListener('load', () => setTimeout(() => document.body.classList.add('loaded'), 1300));
-  setTimeout(() => document.body.classList.add('loaded'), 3500); // safety
+  /* ---------- NEWS DISGUISE / UNLOCK ---------- */
+  const NEWS_CODE = 'nova-games.io';
+  const nSearch = document.getElementById('newsSearch');
+  document.getElementById('nnDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  function tryUnlock(enter) {
+    const v = nSearch.value.trim().toLowerCase().replace(/\s+/g, '');
+    if (v === NEWS_CODE) { unlockStore(); return; }
+    if (enter) {
+      const note = document.getElementById('nnNote');
+      note.textContent = 'No results for "' + nSearch.value + '" — try reading an article instead.';
+      note.classList.add('show');
+      setTimeout(() => note.classList.remove('show'), 2600);
+    }
+  }
+  function unlockStore() {
+    const news = document.getElementById('news');
+    news.style.opacity = '0';
+    setTimeout(() => {
+      document.body.classList.add('store-mode');
+      document.body.classList.add('loaded');
+      news.style.opacity = '';
+    }, 380);
+  }
+  nSearch.addEventListener('input', () => tryUnlock(false));
+  nSearch.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(true); });
+  document.getElementById('newsSearchBtn').addEventListener('click', () => tryUnlock(true));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.body.classList.contains('store-mode')) {
+      document.body.classList.remove('store-mode', 'loaded');
+      nSearch.value = '';
+      scrollTo(0, 0);
+    }
+  });
 
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -934,7 +1071,7 @@
 </script>
 
 <!-- ============ 3D MACBOOK — rendered locally with Three.js ============ -->
-<script src="mac-embed.js"></script>
+<script src="render-lib.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
